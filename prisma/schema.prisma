@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  url       String
+  title     String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  clicks    Click[]
+}
+
+model Click {
+  id        String   @id @default(cuid())
+  linkId    String
+  code      String
+
+  ip            String?
+  userAgent     String?
+  browser       String?
+  browserVersion String?
+  os            String?
+  osVersion     String?
+  device        String?
+  deviceModel   String?
+  referrer      String?
+  language      String?
+
+  country    String?
+  region     String?
+  city       String?
+  latitude   Float?
+  longitude  Float?
+  isp        String?
+  timezone   String?
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+
+  screenWidth    Int?
+  screenHeight   Int?
+  colorDepth     Int?
+  pixelRatio     Float?
+  timezoneOffset Int?
+  platform       String?
+  cookiesEnabled Boolean?
+  doNotTrack     Boolean?
+  connectionType  String?
+  connectionDownlink Float?
+  connectionRtt   Int?
+  touchSupport    Boolean?
+
+  fingerprintId     String?
+  canvasFingerprint String?
+  webglVendor       String?
+  webglRenderer     String?
+
+  canvasFonts     String?
+
+  clickedAt     DateTime @default(now())
+  redirectDelay Int?
+  bounced       Boolean? @default(false)
+
+  link Link @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@index([linkId])
+  @@index([clickedAt])
+  @@index([country])
+}
