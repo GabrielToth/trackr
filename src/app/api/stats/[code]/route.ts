@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { parseSessionToken } from '@/lib/auth'
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
   try {
+    const token = request.cookies.get('trackr_session')?.value
+    if (!token || !parseSessionToken(token)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const { code } = await params
 
     const link = await prisma.link.findUnique({ where: { code } })

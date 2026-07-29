@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateCode } from '@/lib/code'
+import { parseSessionToken } from '@/lib/auth'
+
+function requireAuth(request: NextRequest): boolean {
+  const token = request.cookies.get('trackr_session')?.value
+  return !!token && !!parseSessionToken(token)
+}
+
+function unauthorized(): NextResponse {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
 
 export async function POST(request: NextRequest) {
+  if (!requireAuth(request)) return unauthorized()
+
   try {
     const { url, title, utmSource, utmMedium, utmCampaign, utmTerm, utmContent } = await request.json()
 
@@ -50,7 +62,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!requireAuth(request)) return unauthorized()
+
   try {
     const links = await prisma.link.findMany({
       orderBy: { createdAt: 'desc' },
